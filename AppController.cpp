@@ -19,30 +19,40 @@ AppController::AppController(MainWindow &mainWindow) :
     connect(&thread, &WorkerThread::finished, &thread, &QObject::deleteLater);
     connect(&thread, &WorkerThread::new_word, &display, &TextDisplayWidget::change_word);
     connect(&display, &TextDisplayWidget::keyPressed, this, &AppController::keyInput);
+    connect(mainWindow.textSpeedBox,QOverload<int>::of(&QSpinBox::valueChanged),[this](int n){
+        constexpr double minute = 6e7;
+        this->data->base_time = minute / n;
+    });
+    connect(mainWindow.textSizeBox,QOverload<int>::of(&QSpinBox::valueChanged),&display,&TextDisplayWidget::change_font_size);
     thread.start();
 }
 
 void AppController::keyInput(int key) {
     if (key == Qt::Key_P && data->is_paused) {
         QMutexLocker locker(&data->mutex);
-        data->text = QApplication::clipboard()->text().split(QRegularExpression("[ .,—]+"));
+        data->text = QApplication::clipboard()->text().split(QRegularExpression("[ .,—\n]+"));
         data->iterator = data->text.begin();
         data->is_paused = false;
     } else if (key == Qt::Key_Space) {
         data->is_paused = !data->is_paused;
-    } else if (key == Qt::Key_Left && data->is_paused) {
+    } else if ((key == Qt::Key_Left || key == Qt::Key_H )&& data->is_paused) {
         QMutexLocker locker(&data->mutex);
         if (data->iterator != data->text.begin()) {
             data->iterator--;
         }
         thread.update_word();
-    } else if (key == Qt::Key_Right && data->is_paused) {
+    } else if ((key == Qt::Key_Right || key== Qt::Key_L) && data->is_paused) {
         QMutexLocker locker(&data->mutex);
         if (data->iterator != data->text.end()) {
             data->iterator++;
         }
         thread.update_word();
     }
+    else if (key == Qt::Key_R){
+        QMutexLocker locker(&data->mutex);
+        data->iterator = data->text.begin();
+    }
+
 }
 
 AppController::~AppController() {
@@ -64,14 +74,14 @@ void WorkerThread::run() {
             const auto &word = *data.iterator++;
             auto len = word.size();
             emit(new_word(word));
+            double time = data.base_time;
             data.mutex.unlock();
-            double time = base_time;
             if (len > 7) {
                 time *= 1.5;
             } else if (len < 4) {
                 time /= 2;
             }
-            QThread::msleep(llround(time));
+            QThread::usleep(lround(time));
         } else
             data.is_paused = true;
 
@@ -100,11 +110,10 @@ void WorkerThread::run() {
 }
 
 
-void WorkerThread::speed_change(int new_speed) {
-    base_time = 60000.0 / new_speed;
-}
 
 void WorkerThread::update_word() {
+    if(data.iterator == data.text.end())
+        return;
     const auto &word = *data.iterator;
     emit new_word(word);
 }

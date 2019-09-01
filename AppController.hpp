@@ -15,7 +15,7 @@ struct AppData {
     QStringList::iterator iterator;
     QMutex mutex;
     bool is_paused;
-
+    double base_time = 200000;
 };
 
 class AppController;
@@ -26,7 +26,6 @@ Q_OBJECT
 public:
     bool is_running = false;
     bool is_paused = false;
-    double base_time = 200;
     AppController *controller;
 
     AppData &data;
@@ -36,10 +35,6 @@ public:
     void run() override;
 
     void update_word();
-
-public slots:
-
-    void speed_change(int new_speed);
 
 signals:
 

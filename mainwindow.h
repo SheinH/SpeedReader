@@ -14,10 +14,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     QClipboard* clipboard;
     TextDisplayWidget display;
-    QSpinBox* textSpeedBox;
-    QSpinBox* textSizeBox;
 public:
     TextDisplayWidget &getDisplay();
+    QSpinBox* textSpeedBox;
+    QSpinBox* textSizeBox;
 
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
