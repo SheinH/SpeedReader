@@ -14,7 +14,7 @@ struct AppData {
     QStringList text;
     QStringList::iterator iterator;
     QMutex mutex;
-    bool is_paused;
+    volatile bool is_paused = true;
     double base_time = 200000;
 };
 

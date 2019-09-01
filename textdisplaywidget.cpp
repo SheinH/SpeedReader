@@ -12,6 +12,7 @@ TextDisplayWidget::TextDisplayWidget() {
     font.setPixelSize(30);
     setFont(font);
     setAlignment(Qt::AlignCenter);
+    setText("Press P to read\n from clipboard");
 }
 
 void TextDisplayWidget::keyPressEvent(QKeyEvent *event) {

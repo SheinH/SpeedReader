@@ -27,15 +27,17 @@ CONFIG += c++17
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    textdisplaywidget.cpp
+    textdisplaywidget.cpp \
+    AppController.cpp
 
 HEADERS += \
         mainwindow.h \
-    textdisplaywidget.h
+    textdisplaywidget.h \
+    AppController.hpp
 
 FORMS += \
         mainwindow.ui
-
+CONFIG += app_bundle
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
