@@ -8,17 +8,46 @@
 
 #include "mainwindow.h"
 #include <QThread>
+#include <QMutex>
 
 struct AppData {
-    std::vector<QString> words;
-    std::vector<QString>::iterator current_word;
+    QStringList text;
+    QStringList::iterator iterator;
+    QMutex mutex;
+    bool is_paused;
 
-    AppData();
+};
+
+class AppController;
+
+class WorkerThread : public QThread {
+Q_OBJECT
+
+public:
+    bool is_running = false;
+    bool is_paused = false;
+    double base_time = 200;
+    AppController *controller;
+
+    AppData &data;
+
+    WorkerThread(AppController *parent);
+
+    void run() override;
+
+    void update_word();
+
+public slots:
+
+    void speed_change(int new_speed);
+
+signals:
+
+    void new_word(const QString &result);
 };
 
 class AppController : public QObject {
 Q_OBJECT
-    AppData data;
     MainWindow &mainWindow;
     TextDisplayWidget &display;
     unsigned int wpm;
@@ -26,14 +55,17 @@ Q_OBJECT
 public:
     virtual ~AppController();
 
-    void threadEventLoop();
-private:
+    AppData *data;
 
+public slots:
+
+    void keyInput(int key);
+private:
+    WorkerThread &thread;
 public:
     AppController(MainWindow &mainWindow);
 
 signals:
-
     void change_word(const QString &newWord);
 };
 

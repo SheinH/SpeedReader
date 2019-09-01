@@ -18,8 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     grid->addWidget(&display, 0, 0);
     setTabOrder(&display, textSpeedBox);
     setTabOrder(textSpeedBox, textSizeBox);
-    connect(textSpeedBox, QOverload<int>::of(&QSpinBox::valueChanged), display.workerThread,
-            &WorkerThread::speed_change);
+    this->setFixedSize(QSize(550, 400));
 }
 
 MainWindow::~MainWindow() {
