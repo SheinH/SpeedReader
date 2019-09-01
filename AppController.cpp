@@ -6,8 +6,8 @@
 #include "textdisplaywidget.h"
 #include <QSpinBox>
 #include <QtGlobal>
-#include <QMutexLocker>
 
+AppController::AppController(MainWindow &mainWindow) :
         mainWindow(mainWindow),
         display(mainWindow.getDisplay()),
         currently_running(false),
@@ -15,12 +15,12 @@
         thread(*(new WorkerThread(this))),
         data(new AppData()) {
     connect(this, &AppController::change_word, &display, &TextDisplayWidget::change_word);
-            data->iterator = data->text.begin();
-            connect(&thread, &WorkerThread::finished, &thread, &QObject::deleteLater);
-            connect(&thread, &WorkerThread::new_word, &display, &TextDisplayWidget::change_word);
-            connect(&display, &TextDisplayWidget::keyPressed, this, &AppController::keyInput);
-            thread.start();
-        }
+    data->iterator = data->text.begin();
+    connect(&thread, &WorkerThread::finished, &thread, &QObject::deleteLater);
+    connect(&thread, &WorkerThread::new_word, &display, &TextDisplayWidget::change_word);
+    connect(&display, &TextDisplayWidget::keyPressed, this, &AppController::keyInput);
+    thread.start();
+}
 
 void AppController::keyInput(int key) {
     if (key == Qt::Key_P && data->is_paused) {
