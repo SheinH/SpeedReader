@@ -6,7 +6,6 @@
 #include "textdisplaywidget.h"
 #include <QSpinBox>
 #include <QtGlobal>
-#include <cmath>
 #include <iostream>
 
 AppController::AppController(MainWindow &mainWindow) :
@@ -37,12 +36,7 @@ void AppController::keyInput(int key) {
         data->text = QApplication::clipboard()->text().split(QRegularExpression("[ .,—\n]+"));
         data->iterator = data->text.begin();
         data->is_paused = false;
-		data->pause_mutex.unlock();
     } else if (key == Qt::Key_Space) {
-		if(data->is_paused)
-			data->pause_mutex.unlock();
-		else
-			data->pause_mutex.lock();
         data->is_paused = !data->is_paused;
         std::cout << "UNPAUSED\n";
         std::cout << "PAUSE STATE: " << data->is_paused << "\n";
@@ -78,8 +72,14 @@ WorkerThread::WorkerThread(AppController *parent) : controller(parent), data(*pa
 
 void WorkerThread::run() {
     std::cout << "THREAD STARTED \n";
+    bool writeonce = true;
     while (true) {
-        QMutexLocker locker(&data.mutex);
+        if(writeonce){
+            writeonce =false;
+            std::cout << "INNER LOOP REACHED\n";
+        }
+        while (data.is_paused) {
+        }
         std::cout << "UNPAUSED\n";
         if (data.iterator != data.text.end()) {
             data.mutex.lock();
@@ -89,14 +89,17 @@ void WorkerThread::run() {
             std::cout << "NEW WORD EMITTED \n";
             double time = data.base_time;
             data.mutex.unlock();
-            if (len > 7) {
-                time *= (len / 7.0);
+            if (len > 5) {
+                time *= len / 5.0;
             } else if (len < 4) {
                 time /= 2;
             }
             QThread::usleep(lround(time));
         } else
             data.is_paused = true;
+
+        while (data.is_paused) {
+        }
     }
     /*
     while (true) {
