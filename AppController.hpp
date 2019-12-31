@@ -9,23 +9,25 @@
 #include "mainwindow.h"
 #include <QThread>
 #include <QMutex>
+#include <QStateMachine>
+#include <QWaitCondition>
 
-struct AppData {
+class AppData {
+public:
     QStringList text;
     QStringList::iterator iterator;
     QMutex mutex;
     volatile bool is_paused = true;
+    QWaitCondition pauseCond;
     double base_time = 200000;
 };
 
 class AppController;
 
 class WorkerThread : public QThread {
-Q_OBJECT
-
+    Q_OBJECT
+    void next_word();
 public:
-    bool is_running = false;
-    bool is_paused = false;
     AppController *controller;
 
     AppData &data;
@@ -39,15 +41,16 @@ public:
 signals:
 
     void new_word(const QString &result);
+
 };
 
 class AppController : public QObject {
-Q_OBJECT
-    MainWindow &mainWindow;
+    Q_OBJECT
     TextDisplayWidget &display;
     unsigned int wpm;
     bool currently_running;
 public:
+    MainWindow &mainWindow;
     virtual ~AppController();
 
     AppData *data;

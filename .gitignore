@@ -2,7 +2,7 @@
 /cmake-build-debug/
 /cmake-build-release/
 .idea/
-Makefile
+
 *.stash
 moc_*.cpp
 moc_*.h

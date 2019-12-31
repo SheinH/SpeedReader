@@ -18,6 +18,7 @@ public:
     TextDisplayWidget &getDisplay();
     QSpinBox* textSpeedBox;
     QSpinBox* textSizeBox;
+    QStatusBar* statusBar;
 
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
